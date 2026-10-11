@@ -24,4 +24,4 @@ databases:
   - name: connectx-postgres
     plan: free
     databaseName: connectx_db
-    user: postgres
+    user: connectx_user
