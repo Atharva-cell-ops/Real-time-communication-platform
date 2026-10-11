@@ -12,6 +12,7 @@ import meetingRoutes from './routes/meeting.routes.js';
 import messageRoutes from './routes/message.routes.js';
 import fileRoutes from './routes/file.routes.js';
 import { prisma } from './config/prisma.js';
+import { autoSeedDatabase } from './utils/autoSeed.js';
 
 const app = express();
 const httpServer = http.createServer(app);
@@ -98,13 +99,16 @@ initSocketServer(httpServer);
 
 // Server Listen
 const PORT = config.port;
-httpServer.listen(PORT, () => {
+httpServer.listen(PORT, async () => {
   console.log(`=======================================================`);
   console.log(`🚀 CONNECTX Server running on http://localhost:${PORT}`);
   console.log(`🌐 Environment: ${config.nodeEnv}`);
   console.log(`🔒 CORS Origin: ${config.clientUrl}`);
   console.log(`📁 Uploads Directory: ${config.upload.dir}`);
   console.log(`=======================================================`);
+
+  // Ensure demo accounts exist if database is fresh
+  await autoSeedDatabase();
 });
 
 // Graceful Shutdown
