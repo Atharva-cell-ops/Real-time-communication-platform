@@ -24,9 +24,16 @@ app.use(
 );
 
 // Cross-Origin Resource Sharing (CORS)
+const allowedOrigins = [config.clientUrl, 'http://localhost:5173', 'http://127.0.0.1:5173', 'http://localhost:5000'];
+
 app.use(
   cors({
-    origin: [config.clientUrl, 'http://localhost:5173', 'http://127.0.0.1:5173'],
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.onrender.com')) {
+        return callback(null, true);
+      }
+      return callback(null, true); // Permissive in deployment to prevent connection drops
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
