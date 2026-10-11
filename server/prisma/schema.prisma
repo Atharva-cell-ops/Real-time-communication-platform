@@ -1,0 +1,115 @@
+// CONNECTX Prisma Schema
+// Database ORM configuration for PostgreSQL (supports SQLite dev switch)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String               @id @default(uuid())
+  email        String               @unique
+  name         String
+  passwordHash String
+  avatarUrl    String?
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+
+  hostedMeetings Meeting[]          @relation("HostMeetings")
+  participations MeetingParticipant[]
+  messages       Message[]
+  uploadedFiles  FileAttachment[]
+
+  @@map("users")
+}
+
+model Meeting {
+  id          String               @id @default(uuid())
+  code        String               @unique
+  title       String
+  description String?
+  isLocked    Boolean              @default(false)
+  passcode    String?
+  status      String               @default("ACTIVE") // ACTIVE, ENDED
+  hostId      String
+  host        User                 @relation("HostMeetings", fields: [hostId], references: [id], onDelete: Cascade)
+  createdAt   DateTime             @default(now())
+  endedAt     DateTime?
+
+  participants MeetingParticipant[]
+  messages     Message[]
+  files        FileAttachment[]
+  whiteboard   WhiteboardSession?
+
+  @@index([code])
+  @@index([hostId])
+  @@map("meetings")
+}
+
+model MeetingParticipant {
+  id        String    @id @default(uuid())
+  meetingId String
+  userId    String
+  role      String    @default("PARTICIPANT") // HOST, CO_HOST, PARTICIPANT
+  joinedAt  DateTime  @default(now())
+  leftAt    DateTime?
+
+  meeting   Meeting   @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([meetingId])
+  @@index([userId])
+  @@map("meeting_participants")
+}
+
+model Message {
+  id        String          @id @default(uuid())
+  meetingId String
+  senderId  String
+  content   String
+  fileId    String?         @unique
+  createdAt DateTime        @default(now())
+
+  meeting   Meeting         @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  sender    User            @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  file      FileAttachment? @relation(fields: [fileId], references: [id], onDelete: SetNull)
+
+  @@index([meetingId])
+  @@index([senderId])
+  @@map("messages")
+}
+
+model FileAttachment {
+  id           String    @id @default(uuid())
+  meetingId    String
+  uploaderId   String
+  originalName String
+  storedName   String
+  mimeType     String
+  sizeBytes    Int
+  filePath     String
+  createdAt    DateTime  @default(now())
+
+  meeting      Meeting   @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  uploader     User      @relation(fields: [uploaderId], references: [id], onDelete: Cascade)
+  message      Message?
+
+  @@index([meetingId])
+  @@index([uploaderId])
+  @@map("file_attachments")
+}
+
+model WhiteboardSession {
+  id        String   @id @default(uuid())
+  meetingId String   @unique
+  drawData  String   @default("[]") // Serialized JSON array of draw strokes
+  updatedAt DateTime @updatedAt
+
+  meeting   Meeting  @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+
+  @@map("whiteboard_sessions")
+}

@@ -1,0 +1,36 @@
+{
+  "name": "connectx-platform",
+  "version": "1.0.0",
+  "description": "CONNECTX - Production-grade Real-Time Video, Audio, Whiteboard, and Messaging Communication Platform",
+  "private": true,
+  "workspaces": [
+    "server",
+    "client"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev --workspace=server\" \"npm run dev --workspace=client\"",
+    "build": "npm run build --workspace=server && npm run build --workspace=client",
+    "start": "node server/dist/server.js",
+    "test": "npm run test --workspace=server && npm run test --workspace=client",
+    "lint": "npm run lint --workspace=server && npm run lint --workspace=client",
+    "db:push": "npm run db:push --workspace=server",
+    "db:generate": "npm run db:generate --workspace=server",
+    "db:seed": "npm run db:seed --workspace=server"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  },
+  "keywords": [
+    "webrtc",
+    "socket.io",
+    "react",
+    "typescript",
+    "nodejs",
+    "prisma",
+    "video-conferencing",
+    "whiteboard",
+    "real-time"
+  ],
+  "author": "CONNECTX Team",
+  "license": "MIT"
+}

@@ -1,0 +1,12 @@
+node_modules
+server/node_modules
+client/node_modules
+dist
+client/dist
+server/dist
+.git
+.env
+uploads/*
+!uploads/.gitkeep
+*.log
+scratch/
